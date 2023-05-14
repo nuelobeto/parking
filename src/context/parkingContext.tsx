@@ -13,20 +13,18 @@ function initParking(): ParkingSpace[] {
   }));
 }
 
-function generateBarcode() {
-    return Math.floor(Math.random() * 9000000000000000) + 1000000000000000;
-}
-
-function getPackings(): ParkingSpace[]{
-  return JSON.parse(
-    localStorage.getItem("parkingSpaces") || "[]"
+function generateBarcode(): string {
+  return String(
+    Math.floor(Math.random() * 9000000000000000) + 1000000000000000
   );
 }
 
-function getAllTickets(): ParkingSpace[]{
-  return JSON.parse(
-    localStorage.getItem("allTickets") || "[]"
-  );
+function getPackings(): ParkingSpace[] {
+  return JSON.parse(localStorage.getItem("parkingSpaces") || "[]");
+}
+
+function getAllTickets(): any[] {
+  return JSON.parse(localStorage.getItem("allTickets") || "[]");
 }
 
 export function ParkingContextProvider({
@@ -35,23 +33,27 @@ export function ParkingContextProvider({
   children: React.ReactNode;
 }) {
   const [parkingSpaces, setParkingSpaces] = React.useState(initParking());
-  const [allTickets, setAllTickets] =  React.useState([]);
+  const [allTickets, setAllTickets] = React.useState<any[]>([]);
 
   // Initialize the parking spaces with occupiedSpaces data from local storage
   React.useEffect(() => {
-    const packingSpaces = getPackings()
-    const allTickets = getAllTickets()
-    setParkingSpaces(packingSpaces);
-    setAllTickets(allTickets);
+    const packingSpacesLocal = getPackings();
+    const allTicketsLocal = getAllTickets();
+    setParkingSpaces(
+      packingSpacesLocal.length ? packingSpacesLocal : parkingSpaces
+    );
+    setAllTickets(allTicketsLocal);
   }, []);
 
   const updateParkingSpace = (spaceNumber: number, ticket: string | null) => {
-    setParkingSpaces((prev: ParkingSpace[]) =>
-      prev.map((space) =>
-        space.spaceNumber === spaceNumber ? { ...space, ticket } : space
-      )
+    setParkingSpaces((prev: ParkingSpace[]) => {(prev.map((space) =>
+      space.spaceNumber === spaceNumber ? { ...space, ticket } : space
+    )
+    localStorage.setItem("parkingSpaces", JSON.stringify(parkingSpaces))}
     );
-    localStorage.setItem("parkingSpaces", JSON.stringify(parkingSpaces));
+    console.log({ spaceNumber }, { ticket });
+
+    
   };
 
   const park = async (spaceNumber: number) => {
