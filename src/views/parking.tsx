@@ -3,15 +3,6 @@ import styled from "styled-components";
 import { useParking } from "../context/parkingContext";
 import { ParkingSpace } from "../context/types";
 
-function generateBarcode() {
-  const barcode =
-    Math.floor(Math.random() * 9000000000000000) + 1000000000000000;
-  const ticket = `ticket-${barcode}`;
-  const timestamp = new Date().getTime();
-
-  return { ticket, timestamp, barcode };
-}
-
 function ParkingBox({
   parkingSpace,
 }: {
@@ -22,34 +13,8 @@ function ParkingBox({
 
   const togglePlace = async () => {
     try {
-      const occupiedSpaces = JSON.parse(
-        localStorage.getItem("occupiedSpaces") || "{}"
-      );
-
-      if (ticket) {
-        // If there is a ticket, call the leave function
-        leave(spaceNumber);
-        console.log(`Goodbye! ${spaceNumber}`);
-
-        // Remove the space number from occupiedSpaces object
-        delete occupiedSpaces[spaceNumber];
-      } else {
-        // If there is no ticket, generate a new barcode and call the park function
-        const { barcode, ticket, timestamp } = generateBarcode();
-
-        // Add the space number to occupiedSpaces object
-        occupiedSpaces[spaceNumber] = {
-          barcode,
-          timestamp,
-          ticket,
-        };
-
-        park(spaceNumber);
-        console.log(`Welcome! ${spaceNumber}`);
-      }
-
-      // Update the occupiedSpaces object in local storage
-      localStorage.setItem("occupiedSpaces", JSON.stringify(occupiedSpaces));
+      const res = ticket ? leave(spaceNumber) : park(spaceNumber);
+      console.log(ticket ? "Goodbye!" : "Welcome!");
     } catch (error) {
       console.log(error);
     }
